@@ -3,7 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 (async () => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
 
   // Read the CV file (which is HTML but technically .md extension currently)
@@ -14,7 +17,7 @@ const path = require('path');
   // If it was pure Markdown, we'd convert it, but we refactored it to HTML.
   // We'll wrap it in standard HTML tags just in case, if they are missing, for safety.
   if (!content.trim().startsWith('<!DOCTYPE html>')) {
-      content = `<!DOCTYPE html>
+    content = `<!DOCTYPE html>
       <html>
         <head>
           <meta charset="UTF-8">
@@ -34,10 +37,10 @@ const path = require('path');
     format: 'A4',
     printBackground: true,
     margin: {
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px'
+      top: '0px',
+      right: '0px',
+      bottom: '0px',
+      left: '0px'
     }
   });
 

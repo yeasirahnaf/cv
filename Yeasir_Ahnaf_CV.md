@@ -60,12 +60,12 @@ Dhaka City College
 
 ## CERTIFICATIONS
 
-**The Complete 2024 Web Development Bootcamp**  
-Udemy - 2024  
+**Complete JavaScript Programming: From Novice to Expert**  
+Udemy - 2025  
 Certificate: https://www.udemy.com/certificate/UC-a4351f88-2ff8-4b3e-963b-b83c0801acd4/
 
-**100 Days of Code: The Complete Python Pro Bootcamp**  
-Udemy - 2024  
+**Hands On React JS From Beginner to Expert**  
+Udemy - 2025  
 Certificate: https://www.udemy.com/certificate/UC-1825a9c8-6d13-4058-94dd-349e19ea9684/
 
 ---

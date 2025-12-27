@@ -4,41 +4,49 @@ on:
   push:
     branches: 
       - main
-    paths: 
-      - 'README.md'
+    paths:  
+      - 'README. md'
       - 'Yeasir_Ahnaf_CV.md'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  generate-pdf:
-    runs-on:  ubuntu-latest
+  generate-pdf: 
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses:  actions/checkout@v4
       
-      - name: Convert Markdown to PDF
-        uses: baileyjm02/markdown-to-pdf@v1
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
+      
+      - name:  Convert Markdown to PDF using Pandoc
+        run: |
+          pandoc README.md -o Yeasir_Ahnaf_CV.pdf \
+            --pdf-engine=pdflatex \
+            -V geometry:margin=1in \
+            -V fontsize=11pt
+      
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v4
         with:
-          input_path: README.md
-          output_dir: ./
-          images_dir: ./
-          image_import: false
-          build_html: false
-      
-      - name: Rename PDF
-        run:  mv README.pdf Yeasir_Ahnaf_CV. pdf
-      
-      - name:  Upload PDF as artifact
-        uses:  actions/upload-artifact@v4
-        with:
-          name:  CV-PDF
-          path:  Yeasir_Ahnaf_CV.pdf
+          name: CV-PDF
+          path: Yeasir_Ahnaf_CV.pdf
+          retention-days: 90
       
       - name: Commit PDF to repository
         run: |
-          git config --local user.email "github-actions[bot]@users. noreply.github.com"
-          git config --local user. name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply. github.com"
+          git config --local user.name "github-actions[bot]"
           git add Yeasir_Ahnaf_CV.pdf
-          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate CV PDF"
-          git push
+          if !  git diff --staged --quiet; then
+            git commit -m "Auto-generate CV PDF [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi

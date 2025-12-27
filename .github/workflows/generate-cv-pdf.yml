@@ -2,7 +2,7 @@ name: Generate CV PDF
 
 on: 
   push:
-    branches: 
+    branches:  
       - main
     paths:  
       - 'README. md'
@@ -16,31 +16,60 @@ jobs:
   generate-pdf: 
     runs-on: ubuntu-latest
     
-    steps:
+    steps: 
       - name: Checkout repository
         uses:  actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-      - name: Install Pandoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       
-      - name:  Convert Markdown to PDF using Pandoc
+      - name:  Install dependencies
         run: |
-          pandoc README.md -o Yeasir_Ahnaf_CV.pdf \
-            --pdf-engine=pdflatex \
-            -V geometry:margin=1in \
-            -V fontsize=11pt
+          npm install -g md-to-pdf
+          npm install -g marked
+      
+      - name: Create PDF with custom styling
+        run: |
+          cat > pdf-config.json << 'EOF'
+          {
+            "pdf_options": {
+              "format": "A4",
+              "margin": {
+                "top":  "20mm",
+                "right": "20mm",
+                "bottom":  "20mm",
+                "left": "20mm"
+              },
+              "printBackground": true
+            },
+            "stylesheet": "body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; } h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; } h2 { color: #34495e; margin-top: 25px; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; } strong { color: #2c3e50; } a { color: #3498db; text-decoration: none; }"
+          }
+          EOF
+          md-to-pdf README.md --config-file pdf-config.json --dest Yeasir_Ahnaf_CV.pdf
+      
+      - name:  Verify PDF was created
+        run: |
+          if [ -f "Yeasir_Ahnaf_CV. pdf" ]; then
+            echo "✅ PDF generated successfully"
+            ls -lh Yeasir_Ahnaf_CV.pdf
+          else
+            echo "❌ PDF generation failed"
+            exit 1
+          fi
       
       - name: Upload PDF as artifact
         uses: actions/upload-artifact@v4
-        with:
+        with: 
           name: CV-PDF
           path: Yeasir_Ahnaf_CV.pdf
           retention-days: 90
       
-      - name: Commit PDF to repository
-        run: |
+      - name:  Commit PDF to repository
+        run:  |
           git config --local user.email "github-actions[bot]@users.noreply. github.com"
           git config --local user.name "github-actions[bot]"
           git add Yeasir_Ahnaf_CV.pdf
@@ -48,5 +77,5 @@ jobs:
             git commit -m "Auto-generate CV PDF [skip ci]"
             git push
           else
-            echo "No changes to commit"
+            echo "No changes to commit - PDF is already up to date"
           fi

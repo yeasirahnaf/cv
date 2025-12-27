@@ -80,7 +80,3 @@ Certificate: https://www.udemy.com/certificate/UC-1825a9c8-6d13-4058-94dd-349e19
 - Web Development, Open Source Contribution, Problem Solving, Learning New Technologies
 
 ---
-
-## REFERENCES
-
-Available upon request

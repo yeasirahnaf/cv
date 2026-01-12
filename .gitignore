@@ -1,0 +1,19 @@
+# Node modules (if using npm packages)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.log
+
+# Keep generated folder but ignore temp files
+generated/*.tmp

@@ -1,0 +1,116 @@
+name: Generate CV (PDF and Word)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'CV.md'
+      - 'cv-style.css'
+      - '.github/workflows/generate-cv.yml'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  generate-cv:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          pandoc --version
+          
+      - name: Install LaTeX (for PDF generation)
+        run: |
+          sudo apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
+          
+      - name: Create output directory
+        run: mkdir -p output
+        
+      - name: Generate PDF from Markdown
+        run: |
+          pandoc CV.md \
+            -o output/Yeasir_Ahnaf_Asif_CV.pdf \
+            --pdf-engine=pdflatex \
+            -V geometry:margin=0.75in \
+            -V fontsize=10pt \
+            -V documentclass=article \
+            -V colorlinks=true \
+            -V linkcolor=black \
+            -V urlcolor=black \
+            --metadata title="Yeasir Ahnaf Asif - CV" \
+            --metadata author="Yeasir Ahnaf Asif"
+            
+      - name: Generate DOCX from Markdown
+        run: |
+          pandoc CV.md \
+            -o output/Yeasir_Ahnaf_Asif_CV.docx \
+            --reference-doc=reference.docx \
+            --metadata title="Yeasir Ahnaf Asif - CV" \
+            --metadata author="Yeasir Ahnaf Asif" || \
+          pandoc CV.md \
+            -o output/Yeasir_Ahnaf_Asif_CV.docx \
+            --metadata title="Yeasir Ahnaf Asif - CV" \
+            --metadata author="Yeasir Ahnaf Asif"
+            
+      - name: Generate HTML from Markdown
+        run: |
+          pandoc CV.md \
+            -o output/Yeasir_Ahnaf_Asif_CV.html \
+            --standalone \
+            --css=cv-style.css \
+            --metadata title="Yeasir Ahnaf Asif - CV" \
+            --metadata author="Yeasir Ahnaf Asif"
+            
+      - name: Copy CSS file to output
+        run: cp cv-style.css output/
+        
+      - name: List generated files
+        run: |
+          echo "Generated files:"
+          ls -lh output/
+          
+      - name: Upload CV artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-documents
+          path: |
+            output/Yeasir_Ahnaf_Asif_CV.pdf
+            output/Yeasir_Ahnaf_Asif_CV.docx
+            output/Yeasir_Ahnaf_Asif_CV.html
+            output/cv-style.css
+          retention-days: 90
+          
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            output/Yeasir_Ahnaf_Asif_CV.pdf
+            output/Yeasir_Ahnaf_Asif_CV.docx
+            output/Yeasir_Ahnaf_Asif_CV.html
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Deploy to GitHub Pages (optional)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
+          publish_branch: gh-pages
+          force_orphan: true
